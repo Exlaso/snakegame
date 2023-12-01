@@ -6,8 +6,11 @@ export const POST = async (req: NextRequest) => {
     try {
 
         const body: APIADDCOOKIE = await req.json();
-        const a = jwt.sign(body,process.env.JWTKEY)
-        cookies().set("token",a);
+        const a = jwt.sign(body, process.env.JWTKEY)
+        cookies().set("token", a, {
+            path: "/",
+            maxAge: 60 * 60 * 24 * 7
+        });
 
 
         return NextResponse.json(true)
