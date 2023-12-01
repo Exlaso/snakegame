@@ -131,7 +131,7 @@ export default function Home() {
                 <div className={"grid-cols-1 md:grid-cols-2 gap-3 grid my-4"}>
 
                     {(loggedinname !== "") ? (
-                        <div className={"grid grid-cols-2 gap-2 justify-center items-center"}>
+                        <div className={"grid grid-cols-1 md:grid-cols-2 gap-2 justify-center items-center"}>
                             <p className={"text-xl text-center capitalize font-semibold"}>You are logged in
                                 as {loggedinname}</p>
                             <Button onClick={() => setloggedinname("")} className={"w-max text-sm"}>Login with other
