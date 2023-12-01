@@ -1,7 +1,7 @@
 import {NextRequest, NextResponse} from "next/server";
 import {cookies} from "next/headers";
 
-var jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 export const POST = async (req: NextRequest) => {
     try {
 

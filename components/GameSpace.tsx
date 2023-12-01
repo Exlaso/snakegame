@@ -24,7 +24,7 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
     const [countdown, setcountdown] = useState<number>(3);
     const [istarted, setistarted] = useState<boolean>(false);
     const [ismodalopen, setIsmodalopen] = useState<boolean>(false);
-    const [isgamepaused, setisgamepaused] = useState<boolean>(true);
+    const [isgamepaused, setisgamepaused] = useState<boolean>(false);
     const GRID_SIZE: number = 20
     const INTIALSPEED = 100
     const [GAME_SPEED, setGAME_SPEED] = useState<number>(INTIALSPEED);
