@@ -349,21 +349,29 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
         {isgamepaused && <h1 className={"text-md md:text-lg text-center text-red-500"}>Game Paused</h1>}
         {isdevicetouchscreen() && <div className={"flex flex-col gap-1"}>
             <Button className={"w-1/2 mx-auto  text-xl"} onClick={() => {
-                direction !== "down" && setdirection("up")
+                if (!isgamepaused) {
+                    direction !== "down" && setdirection("up")
+                }
             }}>UP</Button>
             <div className={"flex gap-1"}><Button className={"w-full  text-xl"}
                                                   onClick={() => {
-                                                      direction !== "right" && setdirection("left")
+                                                      if (!isgamepaused) {
+                                                          direction !== "right" && setdirection("left")
+                                                      }
                                                   }}
             >LEFT</Button>
                 <Button className={"w-full  text-xl"}
                         onClick={() => {
-                            direction !== "left" && setdirection("right")
+                            if (!isgamepaused) {
+                                direction !== "left" && setdirection("right")
+                            }
                         }}
                 >RIGHT</Button></div>
             <Button className={"w-1/2 mx-auto  text-xl"}
                     onClick={() => {
-                        direction !== "up" && setdirection("down")
+                        if (!isgamepaused) {
+                            direction !== "up" && setdirection("down")
+                        }
                     }}
             >DOWN</Button>
 
