@@ -4,6 +4,7 @@ import {motion} from "framer-motion";
 import {Button, Dialog, DialogBody, DialogFooter, DialogHeader, Typography} from "@material-tailwind/react";
 import {useRouter} from "next/navigation";
 import {db} from "@/app/utils/airtable";
+import Link from "next/link";
 
 interface typesforGameSpace {
     username: string
@@ -23,7 +24,7 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
     const [countdown, setcountdown] = useState<number>(3);
     const [istarted, setistarted] = useState<boolean>(false);
     const [ismodalopen, setIsmodalopen] = useState<boolean>(false);
-    const [isgamepaused, setisgamepaused] = useState<boolean>(false);
+    const [isgamepaused, setisgamepaused] = useState<boolean>(true);
     const GRID_SIZE: number = 20
     const INTIALSPEED = 100
     const [GAME_SPEED, setGAME_SPEED] = useState<number>(INTIALSPEED);
@@ -57,18 +58,18 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
         window.removeEventListener("keydown", ChangeDirection)
         setisgameover(true)
         setIsmodalopen(true)
-      if (props.id !== "") {
-          db.select({
-                  filterByFormula: `AND({User Name} = '${props.username}',{Score} < ${score})`,
-                  maxRecords: 1,
-              }
-          ).firstPage((e, i) => {
+        if (props.id !== "") {
+            db.select({
+                    filterByFormula: `AND({User Name} = '${props.username}',{Score} < ${score})`,
+                    maxRecords: 1,
+                }
+            ).firstPage((e, i) => {
 
-              i?.at(0)?.updateFields({
-                  "Score": score,
-              })
+                i?.at(0)?.updateFields({
+                    "Score": score,
+                })
 
-          })
+            })
         }
     }
     const crashedintowall = () => {
@@ -166,10 +167,10 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
     const ChangeDirection = useCallback((e: KeyboardEvent) => {
         if (!isgamepaused) {
 
-            if ((e.key === "ArrowUp" && direction !== "down") || e.key === "w" && direction !== "down") setdirection("up")
-            else if ((e.key === "ArrowDown" && direction !== "up") || e.key === "s" && direction !== "up") setdirection("down")
-            else if ((e.key === "ArrowLeft" && direction !== "right") || e.key === "a" && direction !== "right") setdirection("left")
-            else if ((e.key === "ArrowRight" && direction !== "left") || e.key === "d" && direction !== "left") setdirection("right")
+            if ((e.key === "ArrowUp" && direction !== "down") || e.key.toLowerCase() === "w" && direction !== "down") setdirection("up")
+            else if ((e.key === "ArrowDown" && direction !== "up") || e.key.toLowerCase() === "s" && direction !== "up") setdirection("down")
+            else if ((e.key === "ArrowLeft" && direction !== "right") || e.key.toLowerCase() === "a" && direction !== "right") setdirection("left")
+            else if ((e.key === "ArrowRight" && direction !== "left") || e.key.toLowerCase() === "d" && direction !== "left") setdirection("right")
 
         }
         if (e.key === " ") setisgamepaused((e) => !e)
@@ -249,6 +250,7 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
         exit={{opacity: 0, scale: 0.5}}
 
         className={`flex flex-col`}>
+
         <Dialog
             animate={{
                 mount: {scale: 1, y: 0},
@@ -260,17 +262,22 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
         >
             <DialogHeader>
                 <Typography variant={"h3"}>
-                    Game Over!
+                    Game Over! <sup
+                    className={"text-red-400 text-sm"}> {props.id === "" && "Score are not recorded"}</sup>
                 </Typography>
             </DialogHeader>
             <DialogBody>
-                <Typography variant={"h5"}>{reason}</Typography>
+                <Typography variant={"h5"} color={"red"}>{reason}</Typography>
                 <Typography variant={"h5"}> You scored <span className={"text-green-500 font-bold"}>
                     {score} points.
                 </span>
                     Click Restart Button to restart the game.</Typography>
             </DialogBody>
             <DialogFooter>
+                <Link href={"/LeaderBoard"} className={"m-2"}>
+                    <Button>
+                        LeaderBoard
+                    </Button></Link>
                 <Button
                     variant="gradient"
                     color="green"
@@ -306,34 +313,41 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
                 >
                     <span>Restart</span>
                 </Button>
+
             </DialogFooter>
         </Dialog>
+
         <div className={"grid grid-cols-[1fr,3fr] items-end  gap-1"}>
-            <h1 className={"text-2xl "}>Score: {score}</h1>
+            <div>
+                <h1 className={"text-md "}>Score: {score}</h1>
+            </div>
             <div className={"flex flex-col items-end"}>
-                <h1 className={"text-2xl text-center"}>Logged in as: <span
+                <h1 className={"text-xl text-center"}>Logged in as: <span
                     className={"capitalize"}>{props.username} </span></h1>
-                <Button variant={"filled"} color={"blue-gray"} className={"text-md w-max"} onClick={() => {
+                {<Button variant={"filled"} color={"blue-gray"} className={"text-xs w-max"} onClick={() => {
                     router.push("/")
-                }}>Logout</Button>
+                }}>{props.id === "" ? "Play with Account" : "Logout"}</Button>}
 
             </div>
 
         </div>
-        {!istarted &&
-            <div className={"absolute inset-0 backdrop-blur z-20 text-[5em] flex justify-center items-center "}>
-                {countdown}
+        <div className={"relative"}>
+            {!istarted &&
+                <div
+                    className={"absolute inset-0 backdrop-blur-[2px] z-20 text-[5em] flex justify-center items-center "}>
+                    {countdown}
 
-            </div>}
-        <div
-            className={`bg-white/10  my-2 grid grid-cols-[repeat(20,1em)] md:grid-cols-[repeat(20,2em)]  grid-rows-[repeat(20,1em)] md:grid-rows-[repeat(20,2em)]    aspect-square  border-4   ${isgameover ? " border-red-500 " : ""}`}>
+                </div>}
+            <div
+                onClick={() => setisgamepaused((e) => !e)}
+                className={`bg-white/10  my-2 grid grid-cols-[repeat(20,1em)] md:grid-cols-[repeat(20,2em)]  grid-rows-[repeat(20,1em)] md:grid-rows-[repeat(20,2em)]    aspect-square  border-4   ${isgameover ? " border-red-500 " : ""}`}>
 
-            {GridGenerator()}
+                {GridGenerator()}
+            </div>
         </div>
 
+        {isgamepaused && <h1 className={"text-md md:text-lg text-center text-red-500"}>Game Paused</h1>}
         {isdevicetouchscreen() && <div className={"flex flex-col gap-1"}>
-            <h1 className={"text-2xl text-center text-red-500"}>Use the buttons below to move the snake</h1>
-            <h1 className={"text-2xl text-center text-red-500   my-2"}>Controls</h1>
             <Button className={"w-1/2 mx-auto  text-xl"} onClick={() => {
                 direction !== "down" && setdirection("up")
             }}>UP</Button>
@@ -352,15 +366,9 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
                         direction !== "up" && setdirection("down")
                     }}
             >DOWN</Button>
-            <br/>
-            <hr/>
-            <br/>
-            <Button className={" text-xl"} onClick={
-                () => setisgamepaused((e) => !e)
-            }>PAUSE</Button>
+
         </div>}
 
-        {isgamepaused && <h1 className={"text-2xl text-center text-red-500"}>Game Paused</h1>}
 
         <motion.div
             initial={{opacity: 0, scale: 0.5}}
@@ -369,23 +377,14 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
 
             className={" text-xl "}>
             {
-                !isdevicetouchscreen() ? <div>
-                        <h1 className={"text-2xl text-center text-red-500 my-2"}>Instructions</h1>
-                        <ul className={"flex gap-3 flex-col"}>
+                !isdevicetouchscreen() && <div>
+                    <h1 className={"text-md text-center text-blue-400 my-2"}>Instructions</h1>
+                    <ul className={"flex gap-3 flex-col"}>
 
-                            <li>Use arrow keys to move the snake</li>
-                            <li>Press spacebar to pause the game & resume the game</li>
-                        </ul>
-                    </div> :
-                    <div>
-
-
-                        <h1 className={"text-2xl text-center text-red-500 my-2"}>Instructions</h1>
-                        <ul className={"flex gap-3 flex-col"}>
-                            <li>Use the buttons on the screen to move the snake</li>
-                            <li>Press the pause button to pause the game & resume the game</li>
-                        </ul>
-                    </div>
+                        <li>Use arrow keys to move the snake</li>
+                        <li>Press spacebar to pause the game & resume the game</li>
+                    </ul>
+                </div>
             }
 
 

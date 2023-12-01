@@ -1,22 +1,37 @@
 "use client"
 
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Button, Input, Spinner, Typography} from "@material-tailwind/react";
 import {motion} from "framer-motion";
 import Link from "next/link";
 import {db} from "@/app/utils/airtable";
 import {useRouter} from "next/navigation";
 
+const jwt = require('jsonwebtoken');
+
 
 export default function Home() {
-    const router = useRouter()
-    const startgame = ()=> router.push("/Game?isguest=false")
+    const router = useRouter();
+
+    const startgame = () => router.push("/Game?isguest=false")
     const PreGame = () => {
 
         const [name, setname] = useState<string>("");
         const [code, setcode] = useState<string>("");
         const [error, seterror] = useState<string>("");
         const [isloading, setisloading] = useState<boolean>(false);
+        const [loggedinname, setloggedinname] = useState<string>("");
+
+
+        useEffect(() => {
+            const cookie = document.cookie.split(";").find(c => c.startsWith("token"))
+            console.log({cookie})
+            if (cookie) {
+                const decoded: APIADDCOOKIE = jwt.decode(cookie.split("=")[1], process.env.JWTKEY)
+                console.log({decoded})
+                setloggedinname(decoded.UserName)
+            }
+        }, [])
         const addcookie = async (id: string) => {
             const body: APIADDCOOKIE = {
                 id,
@@ -33,6 +48,10 @@ export default function Home() {
         }
         const handlesubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             e.preventDefault();
+            if (loggedinname !== "") {
+                startgame();
+                return
+            }
             if (name === "" || code === "") {
                 seterror("Please enter your username and code.")
                 return
@@ -111,50 +130,61 @@ export default function Home() {
 
                 <div className={"grid-cols-1 md:grid-cols-2 gap-3 grid my-4"}>
 
-                    <div>
-                        <Input
-                            crossOrigin={""}
+                    {(loggedinname !== "") ? (
+                        <div className={"grid grid-cols-2 gap-2 justify-center items-center"}>
+                            <p className={"text-xl text-center capitalize font-semibold"}>You are logged in
+                                as {loggedinname}</p>
+                            <Button onClick={() => setloggedinname("")} className={"w-max text-sm"}>Login with other
+                                Account</Button>
+                        </div>
 
-                            value={name}
-                            onChange={(e) => {
-                                setname(e.target.value.toLowerCase())
-                                seterror("")
-                            }}
-                            label="Enter your UserName"
-                            type="text"
-                            color="white"
-                            size={"lg"}
-                            className={"text-xl "}
-                            // placeholder={"@SnakeMaster"}
-                            variant={"outlined"}
-                        />
-                        <small className={"text-lg my-2 text-gray-600"}>
-                            Enter Your Unique Username for the leaderboard.
+                    ) : (<>
+                            <div>
+                                <Input
+                                    crossOrigin={""}
 
-                        </small>
-                    </div>
-                    <div>
-                        <Input
-                            crossOrigin={""}
+                                    value={name}
+                                    onChange={(e) => {
+                                        setname(e.target.value.toLowerCase().replaceAll(" ", ""))
+                                        seterror("")
+                                    }}
+                                    label="Enter your UserName"
+                                    type="text"
+                                    color="white"
+                                    size={"lg"}
+                                    className={"text-xl "}
+                                    // placeholder={"@SnakeMaster"}
+                                    variant={"outlined"}
+                                />
+                                <small className={"text-lg my-2 text-gray-600"}>
+                                    Enter Your Unique Username for the leaderboard.
 
-                            value={code}
-                            onChange={(e) => {
-                                seterror("")
-                                setcode(e.target.value.toLowerCase())
-                            }}
-                            label="Enter your Code"
-                            type="text"
-                            color="white"
-                            size={"lg"}
-                            // placeholder={"123"}
-                            className={"text-xl "}
-                            variant={"outlined"}
-                        />
+                                </small>
+                            </div>
+                            <div>
+                                <Input
+                                    crossOrigin={""}
 
-                        <small className={"text-lg my-2 text-gray-600"}>
-                            Enter any code for your authentication.
-                        </small>
-                    </div>
+                                    value={code}
+                                    onChange={(e) => {
+                                        seterror("")
+                                        setcode(e.target.value.toLowerCase().replaceAll(" ", ""))
+                                    }}
+                                    label="Enter your Code"
+                                    type="text"
+                                    color="white"
+                                    size={"lg"}
+                                    // placeholder={"123"}
+                                    className={"text-xl "}
+                                    variant={"outlined"}
+                                />
+
+                                <small className={"text-lg my-2 text-gray-600"}>
+                                    Enter any code for your authentication.
+                                </small>
+                            </div>
+                        </>
+                    )}
                     <p className={"text-lg text-red-500 font-semibold"}>{error}</p>
                 </div>
                 <Button
@@ -164,18 +194,21 @@ export default function Home() {
                     className={"text-xl disabled:brightness-50 flex justify-center items-center gap-2"}
                     // onClick={() => startgame()}
                 >
-                    {isloading && <Spinner />} Start Game
+                    {isloading && <Spinner/>} Start Game
                 </Button>
-                <h3 className={"text-xl text-center  my-2"}>OR</h3>
-                <Link href={"/Game?isguest=true"} >
+                <p>
 
-                <Button
-                    type={"button"}
-                    disabled={isloading}
-                    variant={"filled"} fullWidth={true}
-                    className={"text-xl disabled:brightness-50"}
-                > Start as Guest
-                </Button>
+                </p>
+                <h3 className={"text-xl text-center  my-2"}>OR</h3>
+                <Link href={"/Game?isguest=true"}>
+
+                    <Button
+                        type={"button"}
+                        disabled={isloading}
+                        variant={"filled"} fullWidth={true}
+                        className={"text-xl disabled:brightness-50"}
+                    > Start as Guest
+                    </Button>
                 </Link>
 
                 <small className={"text-lg my-2 text-gray-600"}>Please note, scores will not be stored or displayed on
@@ -199,37 +232,37 @@ export default function Home() {
         return ("ontouchstart" in window || navigator.maxTouchPoints > 0)
     }
     return (
-       <>
+        <>
             <PreGame/>
             <br/>
-           <motion.div
-               initial={{opacity: 0, scale: 0.5}}
-               animate={{opacity: 1, scale: 1}}
-               exit={{opacity: 0, scale: 0.5}}
+            <motion.div
+                initial={{opacity: 0, scale: 0.5}}
+                animate={{opacity: 1, scale: 1}}
+                exit={{opacity: 0, scale: 0.5}}
 
-               className={" text-xl "}>
-               {
-                   !isdevicetouchscreen() ? <div>
-                           <h1 className={"text-2xl text-center text-red-500 my-2"}>Instructions</h1>
-                           <ul className={"flex gap-3 flex-col"}>
+                className={" text-xl "}>
+                {
+                    !isdevicetouchscreen() ? <div>
+                            <h1 className={"text-2xl text-center text-red-500 my-2"}>Instructions</h1>
+                            <ul className={"flex gap-3 flex-col"}>
 
-                               <li>Use arrow keys to move the snake</li>
-                               <li>Press spacebar to pause the game & resume the game</li>
-                           </ul>
-                       </div> :
-                       <div>
-
-
-                           <h1 className={"text-2xl text-center text-red-500 my-2"}>Instructions</h1>
-                           <ul className={"flex gap-3 flex-col"}>
-                               <li>Use the buttons on the screen to move the snake</li>
-                               <li>Press the pause button to pause the game & resume the game</li>
-                           </ul>
-                       </div>
-               }
+                                <li>Use arrow keys to move the snake</li>
+                                <li>Press spacebar to pause the game & resume the game</li>
+                            </ul>
+                        </div> :
+                        <div>
 
 
-           </motion.div>
+                            <h1 className={"text-2xl text-center text-red-500 my-2"}>Instructions</h1>
+                            <ul className={"flex gap-3 flex-col"}>
+                                <li>Use the buttons on the screen to move the snake</li>
+                                <li>Press the pause button to pause the game & resume the game</li>
+                            </ul>
+                        </div>
+                }
+
+
+            </motion.div>
         </>
     )
 }

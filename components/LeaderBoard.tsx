@@ -7,15 +7,17 @@ interface typesforLeaderBoard {
     data: customAIRTABLEDATA[]
 }
 
+
 const LeaderBoard: FunctionComponent<typesforLeaderBoard> = (props) => {
 
-const router = useRouter()
+    const router = useRouter()
     const TABLE_HEAD = ["Name", "Score", "Date"];
     const TABLE_ROWS = props.data
 
     return <>
-        <Typography variant={"h1"}>LeaderBoard</Typography>
-<br />
+        <Typography variant={"h3"}>Snake Game</Typography>
+        <Typography variant={"h2"}>LeaderBoard</Typography>
+        <br/>
 
         <Card className="h-full w-full overflow-hidden">
             <table className="w-full min-w-max table-fixed text-center ">
@@ -35,26 +37,27 @@ const router = useRouter()
                 </tr>
                 </thead>
                 <tbody>
-                {TABLE_ROWS.map(({name,  date, score}) => (
+                {TABLE_ROWS.map(({name, date, score}) => (
                     <tr key={name} className="even:bg-blue-gray-50/50 ">
                         <td className="p-4">
-                            <Typography variant="h5" color="blue-gray" className="font-normal capitalize">
+                            <Typography variant="h5" color="blue-gray"
+                                        className="font-normal text-sm md:text-lg capitalize">
                                 {name}
                             </Typography>
                         </td>
                         <td className="p-4">
-                            <Typography variant="h5" color="blue-gray" className="font-normal">
+                            <Typography variant="h5" color="blue-gray" className="font-normal text-sm md:text-lg">
                                 {score}
                             </Typography>
                         </td>
                         <td className="p-4">
-                            <Typography variant="h5" color="blue-gray" className="font-normal">
+                            <Typography variant="h5" color="blue-gray" className="font-normal text-sm md:text-lg">
                                 {new Date(date).toLocaleString("en-IN", {
                                     hour12: true,
                                     minute: "numeric",
                                     hour: "numeric",
                                     second: undefined,
-                                   month: "long",
+                                    month: "long",
                                     year: "numeric",
                                     day: "numeric",
                                 })}
@@ -66,8 +69,8 @@ const router = useRouter()
             </table>
         </Card>
 
-        <Button  className={"text-lg m-5"} color={"blue-gray"} onClick={()=>{
-           router.push("/");
+        <Button className={"text-lg m-5"} color={"blue-gray"} onClick={() => {
+            router.push("/");
         }}>
             Play Game
         </Button>

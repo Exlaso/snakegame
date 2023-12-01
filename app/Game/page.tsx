@@ -45,7 +45,7 @@ export const metadata = {
 
 export const dynamic = "force-dynamic"
 const page: FunctionComponent<typesforpage> = (props) => {
-    let username = "";
+    let username = "Guest";
     let id = "";
 
     if (props.searchParams?.isguest !== "true") {
