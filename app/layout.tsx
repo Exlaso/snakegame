@@ -11,6 +11,9 @@ export const metadata: Metadata = {
     metadataBase: new URL("https://snakegame.exlaso.in"),
     keywords: ["Snake", "Game", "Vedant", "Bhavsar", "Exlaso", "Exlaso.in", "Vedant Bhavsar", "Snake Game"],
     robots: "index, follow",
+    alternates: {
+        canonical: new URL("https://snakegame.exlaso.in")
+    },
     icons: new URL("https://exlaso.in/icon.svg"),
     authors: [
         {

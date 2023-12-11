@@ -1,7 +1,7 @@
 "use client"
 import React, {FunctionComponent, useCallback, useEffect, useState} from "react";
 import {motion} from "framer-motion";
-import {Button, Dialog, DialogBody, DialogFooter, DialogHeader, Typography} from "@material-tailwind/react";
+import {Button, DialogBody, DialogFooter, DialogHeader, Typography} from "@material-tailwind/react";
 import {useRouter} from "next/navigation";
 import {db} from "@/app/utils/airtable";
 import Link from "next/link";
@@ -72,13 +72,30 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
             })
         }
     }
-    const crashedintowall = () => {
-        setreason("You crashed into the wall.")
-        gameover();
-    }
+    // const crashedintowall = () => {
+    //     setreason("You crashed into the wall.")
+    //     gameover();
+    // }
     const crashedinself = () => {
         setreason("You crashed into yourself.")
         gameover();
+    }
+
+    const movethroughwallforcol = (new_x_coord: coords): coords => {
+        if (new_x_coord.col < 0) {
+            return {col: GRID_SIZE, row: new_x_coord.row}
+        } else if (new_x_coord.col >= GRID_SIZE) {
+            return {col: 0, row: new_x_coord.row}
+        }
+        return new_x_coord
+    }
+    const movethroughwallforrow = (new_x_coord: coords): coords => {
+        if (new_x_coord.row < 0) {
+            return {col: new_x_coord.col, row: GRID_SIZE}
+        } else if (new_x_coord.row >= GRID_SIZE) {
+            return {col: new_x_coord.col, row: 0}
+        }
+        return new_x_coord
     }
     const MoveSnake = () => {
         if (snake.some((s) => s.col === snake[0].col && s.row === snake[0].row && s !== snake[0])) {
@@ -87,57 +104,27 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
 
         if (direction === "up") setsnake((coords) => {
             let new_x_coord: coords = {col: (coords[0].col - 1), row: coords[0].row}
-            if (new_x_coord.col < 0) {
-                crashedintowall();
-                return coords
-            } else if (new_x_coord.col >= GRID_SIZE) {
-                crashedintowall();
-                return coords
-            }
-            return [{
-                col: (coords[0].col - 1),
-                row: coords[0].row
-            }, ...coords.slice(0, coords.length - 1)]
+            new_x_coord = movethroughwallforcol(new_x_coord);
+            return [new_x_coord, ...coords.slice(0, coords.length - 1)]
 
         })
 
         if (direction === "down") setsnake((coords) => {
             let new_x_coord: coords = {col: (coords[0].col + 1), row: coords[0].row}
-            if (new_x_coord.col < 0) {
-                crashedintowall();
-                return coords
-            } else if (new_x_coord.col >= GRID_SIZE) {
-                crashedintowall();
-                return coords
-            }
-            return [{
-                col: (coords[0].col + 1),
-                row: coords[0].row
-            }, ...coords.slice(0, coords.length - 1)]
+            new_x_coord = movethroughwallforcol(new_x_coord);
+            return [new_x_coord, ...coords.slice(0, coords.length - 1)]
 
         })
         if (direction === "left") setsnake((coords) => {
             let new_x_coord: coords = {col: coords[0].col, row: coords[0].row - 1}
-            if (new_x_coord.row < 0) {
-                crashedintowall();
-                return coords
-            } else if (new_x_coord.row >= GRID_SIZE) {
-                crashedintowall();
-                return coords
-            }
-            return [{col: coords[0].col, row: coords[0].row - 1}, ...coords.slice(0, coords.length - 1)]
+            new_x_coord = movethroughwallforrow(new_x_coord);
+            return [new_x_coord, ...coords.slice(0, coords.length - 1)]
 
         })
         if (direction === "right") setsnake((coords) => {
             let new_x_coord: coords = {col: coords[0].col, row: coords[0].row + 1}
-            if (new_x_coord.row < 0) {
-                crashedintowall();
-                return coords
-            } else if (new_x_coord.row >= GRID_SIZE) {
-                crashedintowall();
-                return coords
-            }
-            return [{col: coords[0].col, row: coords[0].row + 1}, ...coords.slice(0, coords.length - 1)]
+            new_x_coord = movethroughwallforrow(new_x_coord);
+            return [new_x_coord, ...coords.slice(0, coords.length - 1)]
 
         })
 
@@ -227,10 +214,10 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
                 if (snake.some((s) => s.col === row && s.row === col)) {
                     if (snake[0].col === row && snake[0].row === col) {
                         grid.push(<div key={`${row}-${col}`}
-                                       className={`snake border ${RotateSnakeHead(direction)}`}>{"<-"} </div>)
+                                       className={`snake rounded-s-2xl border ${RotateSnakeHead(direction)}`}>{"<-"} </div>)
                         continue
                     }
-                    className += " snake "
+                    className += " snake rounded-sm "
 
                 }
 
@@ -249,73 +236,81 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
         animate={{opacity: 1, scale: 1}}
         exit={{opacity: 0, scale: 0.5}}
 
-        className={`flex flex-col`}>
-
-        <Dialog
+        className={`flex flex-col `}>
+        <motion.div
             animate={{
-                mount: {scale: 1, y: 0},
-                unmount: {scale: 0.9, y: -100},
+                opacity: ismodalopen ? 1 : 0,
+                scale: ismodalopen ? 1 : 0.5,
+                transition: {
+                    duration: 0.2
+                }
             }}
-            open={ismodalopen}
-            size={"md"}
-            handler={setIsmodalopen}
-        >
-            <DialogHeader>
-                <Typography variant={"h3"}>
-                    Game Over! <sup
-                    className={"text-red-400 text-sm"}> {props.id === "" && "Score are not recorded"}</sup>
-                </Typography>
-            </DialogHeader>
-            <DialogBody>
-                <Typography variant={"h5"} color={"red"}>{reason}</Typography>
-                <Typography variant={"h5"}> You scored <span className={"text-green-500 font-bold"}>
+            className={"backdrop-brightness-50 flex justify-center items-center h-screen fixed z-[100] inset-0 "}>
+
+
+            <motion.dialog
+                className={" rounded-2xl p-4"}
+
+                open={ismodalopen}
+
+            >
+                <DialogHeader>
+                    <Typography variant={"h3"}>
+                        Game Over! <sup
+                        className={"text-red-400 text-sm"}> {props.id === "" && "Score are not recorded"}</sup>
+                    </Typography>
+                </DialogHeader>
+                <DialogBody>
+                    <Typography variant={"h5"} color={"red"}>{reason}</Typography>
+                    <Typography variant={"h5"}> You scored <span className={"text-green-500 font-bold"}>
                     {score} points.
                 </span>
-                    Click Restart Button to restart the game.</Typography>
-            </DialogBody>
-            <DialogFooter>
-                <Link href={"/LeaderBoard"} className={"m-2"}>
-                    <Button>
-                        LeaderBoard
-                    </Button></Link>
-                <Button
-                    variant="gradient"
-                    color="green"
-                    onClick={() => {
-                        setistarted(false);
-                        setcountdown(3);
-                        const interval = setInterval(() => {
-                            setcountdown((e) => e - 1)
-                        }, 1000);
-                        setTimeout(() => {
-                            clearInterval(interval)
-                            setistarted(true)
-                        }, 4000);
-                        setIsmodalopen(false);
-                        setisgameover(false);
-                        setisgamepaused(false);
-                        setdirection("right");
-                        setfood(RandomCellGenerator());
-                        setscore(0);
-                        setsnake([
-                            {
-                                col: 0,
-                                row: 1
-                            }, {
-                                col: 0,
-                                row: 0
-                            }
-                        ]);
-                        window.addEventListener("keydown", ChangeDirection)
+                        Click Restart Button to restart the game.</Typography>
+                </DialogBody>
+                <DialogFooter>
+                    <Link href={"/LeaderBoard"} className={"m-2"}>
+                        <Button>
+                            LeaderBoard
+                        </Button></Link>
+                    <Button
+                        variant="gradient"
+                        color="green"
+                        onClick={() => {
+                            setistarted(false);
+                            setcountdown(3);
+                            const interval = setInterval(() => {
+                                setcountdown((e) => e - 1)
+                            }, 1000);
+                            setTimeout(() => {
+                                clearInterval(interval)
+                                setistarted(true)
+                            }, 4000);
+                            setIsmodalopen(false);
+                            setisgameover(false);
+                            setisgamepaused(false);
+                            setdirection("right");
+                            setfood(RandomCellGenerator());
+                            setscore(0);
+                            setsnake([
+                                {
+                                    col: 0,
+                                    row: 1
+                                }, {
+                                    col: 0,
+                                    row: 0
+                                }
+                            ]);
+                            window.addEventListener("keydown", ChangeDirection)
 
-                    }
-                    }
-                >
-                    <span>Restart</span>
-                </Button>
+                        }
+                        }
+                    >
+                        <span>Restart</span>
+                    </Button>
 
-            </DialogFooter>
-        </Dialog>
+                </DialogFooter>
+            </motion.dialog>
+        </motion.div>
 
         <div className={"grid grid-cols-[1fr,3fr] items-end  gap-1"}>
             <div>
@@ -385,12 +380,16 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
 
             className={" text-xl "}>
             {
-                !isdevicetouchscreen() && <div>
-                    <h1 className={"text-md text-center text-blue-400 my-2"}>Instructions</h1>
+                !isdevicetouchscreen() ? <div>
+                    <h3 className={"text-md text-center text-blue-400 my-2"}>Instructions</h3>
                     <ul className={"flex gap-3 flex-col"}>
 
                         <li>Use arrow keys to move the snake</li>
                         <li>Press spacebar to pause the game & resume the game</li>
+                    </ul>
+                </div> : <div>
+                    <ul className={"flex gap-3 flex-col"}>
+                        <li>Press game-board to pause the game & resume the game</li>
                     </ul>
                 </div>
             }
