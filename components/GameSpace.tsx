@@ -25,7 +25,7 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
     const [istarted, setistarted] = useState<boolean>(false);
     const [ismodalopen, setIsmodalopen] = useState<boolean>(false);
     const [isgamepaused, setisgamepaused] = useState<boolean>(false);
-    const GRID_SIZE: number = 20
+    const GRID_SIZE: number = 15
     const INTIALSPEED = 100
     const [GAME_SPEED, setGAME_SPEED] = useState<number>(INTIALSPEED);
     const [isgameover, setisgameover] = useState<boolean>(false);
@@ -214,7 +214,7 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
                 if (snake.some((s) => s.col === row && s.row === col)) {
                     if (snake[0].col === row && snake[0].row === col) {
                         grid.push(<div key={`${row}-${col}`}
-                                       className={`snake rounded-s-2xl border ${RotateSnakeHead(direction)}`}>{"<-"} </div>)
+                                       className={`snake rounded-s-full bg-red-400 border ${RotateSnakeHead(direction)}`}></div>)
                         continue
                     }
                     className += " snake rounded-sm "
@@ -336,7 +336,12 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
                     </div>}
                 <div
                     onClick={() => setisgamepaused((e) => !e)}
-                    className={`bg-white/10  my-2 grid grid-cols-[repeat(20,1em)] md:grid-cols-[repeat(20,2em)]  grid-rows-[repeat(20,1em)] md:grid-rows-[repeat(20,2em)]    aspect-square  border-4   ${isgameover ? " border-red-500 " : ""}`}>
+                    className={`bg-white/10 my-2 grid aspect-square border-4   ${isgameover ? " border-red-500 " : ""}`}
+                    style={{
+                        gridTemplateColumns: `repeat(${GRID_SIZE},1fr)`,
+                        gridTemplateRows: `repeat(${GRID_SIZE},1fr)`
+                    }}
+                >
 
                     {GridGenerator()}
                 </div>
