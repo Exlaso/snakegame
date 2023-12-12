@@ -231,171 +231,172 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
     const router = useRouter()
 
 
-    return <motion.section
-        initial={{opacity: 0, scale: 0.5}}
-        animate={{opacity: 1, scale: 1}}
-        exit={{opacity: 0, scale: 0.5}}
-
-        className={`flex flex-col `}>
-        <motion.div
-            animate={{
-                opacity: ismodalopen ? 1 : 0,
-                scale: ismodalopen ? 1 : 0.5,
-                transition: {
-                    duration: 0.2
-                }
-            }}
-            className={"backdrop-brightness-50 flex justify-center items-center h-screen fixed z-[100] inset-0 "}>
-
-
-            <motion.dialog
-                className={" rounded-2xl p-4"}
-
-                open={ismodalopen}
-
-            >
-                <DialogHeader>
-                    <Typography variant={"h3"}>
-                        Game Over! <sup
-                        className={"text-red-400 text-sm"}> {props.id === "" && "Score are not recorded"}</sup>
-                    </Typography>
-                </DialogHeader>
-                <DialogBody>
-                    <Typography variant={"h5"} color={"red"}>{reason}</Typography>
-                    <Typography variant={"h5"}> You scored <span className={"text-green-500 font-bold"}>
-                    {score} points.
-                </span>
-                        Click Restart Button to restart the game.</Typography>
-                </DialogBody>
-                <DialogFooter>
-                    <Link href={"/LeaderBoard"} className={"m-2"}>
-                        <Button>
-                            LeaderBoard
-                        </Button></Link>
-                    <Button
-                        variant="gradient"
-                        color="green"
-                        onClick={() => {
-                            setistarted(false);
-                            setcountdown(3);
-                            const interval = setInterval(() => {
-                                setcountdown((e) => e - 1)
-                            }, 1000);
-                            setTimeout(() => {
-                                clearInterval(interval)
-                                setistarted(true)
-                            }, 4000);
-                            setIsmodalopen(false);
-                            setisgameover(false);
-                            setisgamepaused(false);
-                            setdirection("right");
-                            setfood(RandomCellGenerator());
-                            setscore(0);
-                            setsnake([
-                                {
-                                    col: 0,
-                                    row: 1
-                                }, {
-                                    col: 0,
-                                    row: 0
-                                }
-                            ]);
-                            window.addEventListener("keydown", ChangeDirection)
-
-                        }
-                        }
-                    >
-                        <span>Restart</span>
-                    </Button>
-
-                </DialogFooter>
-            </motion.dialog>
-        </motion.div>
-
-        <div className={"grid grid-cols-[1fr,3fr] items-end  gap-1"}>
-            <div>
-                <h1 className={"text-md "}>Score: {score}</h1>
-            </div>
-            <div className={"flex flex-col items-end"}>
-                <h1 className={"text-xl text-center"}>Logged in as: <span
-                    className={"capitalize"}>{props.username} </span></h1>
-                {<Button variant={"filled"} color={"blue-gray"} className={"text-xs w-max"} onClick={() => {
-                    router.push("/")
-                }}>{props.id === "" ? "Play with Account" : "Logout"}</Button>}
-
-            </div>
-
-        </div>
-        <div className={"relative"}>
-            {!istarted &&
-                <div
-                    className={"absolute inset-0 backdrop-blur-[2px] z-20 text-[5em] flex justify-center items-center "}>
-                    {countdown}
-
-                </div>}
-            <div
-                onClick={() => setisgamepaused((e) => !e)}
-                className={`bg-white/10  my-2 grid grid-cols-[repeat(20,1em)] md:grid-cols-[repeat(20,2em)]  grid-rows-[repeat(20,1em)] md:grid-rows-[repeat(20,2em)]    aspect-square  border-4   ${isgameover ? " border-red-500 " : ""}`}>
-
-                {GridGenerator()}
-            </div>
-        </div>
-
-        {isgamepaused && <h1 className={"text-md md:text-lg text-center text-red-500"}>Game Paused</h1>}
-        {isdevicetouchscreen() && <div className={"flex flex-col gap-1"}>
-            <Button className={"w-1/2 mx-auto  text-xl"} onClick={() => {
-                if (!isgamepaused) {
-                    direction !== "down" && setdirection("up")
-                }
-            }}>UP</Button>
-            <div className={"flex gap-1"}><Button className={"w-full  text-xl"}
-                                                  onClick={() => {
-                                                      if (!isgamepaused) {
-                                                          direction !== "right" && setdirection("left")
-                                                      }
-                                                  }}
-            >LEFT</Button>
-                <Button className={"w-full  text-xl"}
-                        onClick={() => {
-                            if (!isgamepaused) {
-                                direction !== "left" && setdirection("right")
-                            }
-                        }}
-                >RIGHT</Button></div>
-            <Button className={"w-1/2 mx-auto  text-xl"}
-                    onClick={() => {
-                        if (!isgamepaused) {
-                            direction !== "up" && setdirection("down")
-                        }
-                    }}
-            >DOWN</Button>
-
-        </div>}
-
-
-        <motion.div
+    return (
+        <motion.section
             initial={{opacity: 0, scale: 0.5}}
             animate={{opacity: 1, scale: 1}}
             exit={{opacity: 0, scale: 0.5}}
 
-            className={" text-xl "}>
-            {
-                !isdevicetouchscreen() ? <div>
-                    <h3 className={"text-md text-center text-blue-400 my-2"}>Instructions</h3>
-                    <ul className={"flex gap-3 flex-col"}>
+            className={`flex flex-col `}>
+            {ismodalopen && <motion.div
+                animate={{
+                    opacity: ismodalopen ? 1 : 0,
+                    scale: ismodalopen ? 1 : 0.5,
+                    transition: {
+                        duration: 0.2
+                    }
+                }}
+                className={"backdrop-brightness-50 flex justify-center items-center h-screen fixed z-[100] inset-0 "}>
 
-                        <li>Use arrow keys to move the snake</li>
-                        <li>Press spacebar to pause the game & resume the game</li>
-                    </ul>
-                </div> : <div>
-                    <ul className={"flex gap-3 flex-col"}>
-                        <li>Press game-board to pause the game & resume the game</li>
-                    </ul>
-                </div>
+
+                <motion.dialog
+                    className={" rounded-2xl p-4"}
+
+                    open={ismodalopen}
+
+                >
+                    <DialogHeader>
+                        <Typography variant={"h3"}>
+                            Game Over! <sup
+                            className={"text-red-400 text-sm"}> {props.id === "" && "Score are not recorded"}</sup>
+                        </Typography>
+                    </DialogHeader>
+                    <DialogBody>
+                        <Typography variant={"h5"} color={"red"}>{reason}</Typography>
+                        <Typography variant={"h5"}> You scored <span className={"text-green-500 font-bold"}>
+                    {score} points.
+                </span>
+                            Click Restart Button to restart the game.</Typography>
+                    </DialogBody>
+                    <DialogFooter>
+                        <Link href={"/LeaderBoard"} className={"m-2"}>
+                            <Button>
+                                LeaderBoard
+                            </Button></Link>
+                        <Button
+                            variant="gradient"
+                            color="green"
+                            onClick={() => {
+                                setistarted(false);
+                                setcountdown(3);
+                                const interval = setInterval(() => {
+                                    setcountdown((e) => e - 1)
+                                }, 1000);
+                                setTimeout(() => {
+                                    clearInterval(interval)
+                                    setistarted(true)
+                                }, 4000);
+                                setIsmodalopen(false);
+                                setisgameover(false);
+                                setisgamepaused(false);
+                                setdirection("right");
+                                setfood(RandomCellGenerator());
+                                setscore(0);
+                                setsnake([
+                                    {
+                                        col: 0,
+                                        row: 1
+                                    }, {
+                                        col: 0,
+                                        row: 0
+                                    }
+                                ]);
+                                window.addEventListener("keydown", ChangeDirection)
+
+                            }
+                            }
+                        >
+                            <span>Restart</span>
+                        </Button>
+
+                    </DialogFooter>
+                </motion.dialog>
+            </motion.div>
             }
+            <div className={"grid grid-cols-[1fr,3fr] items-end  gap-1"}>
+                <div>
+                    <h1 className={"text-md "}>Score: {score}</h1>
+                </div>
+                <div className={"flex flex-col items-end"}>
+                    <h1 className={"text-xl text-center"}>Logged in as: <span
+                        className={"capitalize"}>{props.username} </span></h1>
+                    {<Button variant={"filled"} color={"blue-gray"} className={"text-xs w-max"} onClick={() => {
+                        router.push("/")
+                    }}>{props.id === "" ? "Play with Account" : "Logout"}</Button>}
+
+                </div>
+
+            </div>
+            <div className={"relative"}>
+                {!istarted &&
+                    <div
+                        className={"absolute inset-0 backdrop-blur-[2px] z-20 text-[5em] flex justify-center items-center "}>
+                        {countdown}
+
+                    </div>}
+                <div
+                    onClick={() => setisgamepaused((e) => !e)}
+                    className={`bg-white/10  my-2 grid grid-cols-[repeat(20,1em)] md:grid-cols-[repeat(20,2em)]  grid-rows-[repeat(20,1em)] md:grid-rows-[repeat(20,2em)]    aspect-square  border-4   ${isgameover ? " border-red-500 " : ""}`}>
+
+                    {GridGenerator()}
+                </div>
+            </div>
+
+            {isgamepaused && <h1 className={"text-md md:text-lg text-center text-red-500"}>Game Paused</h1>}
+            {isdevicetouchscreen() && <div className={"flex flex-col gap-1"}>
+                <Button className={"w-1/2 mx-auto  text-xl"} onClick={() => {
+                    if (!isgamepaused) {
+                        direction !== "down" && setdirection("up")
+                    }
+                }}>UP</Button>
+                <div className={"flex gap-1"}><Button className={"w-full  text-xl"}
+                                                      onClick={() => {
+                                                          if (!isgamepaused) {
+                                                              direction !== "right" && setdirection("left")
+                                                          }
+                                                      }}
+                >LEFT</Button>
+                    <Button className={"w-full  text-xl"}
+                            onClick={() => {
+                                if (!isgamepaused) {
+                                    direction !== "left" && setdirection("right")
+                                }
+                            }}
+                    >RIGHT</Button></div>
+                <Button className={"w-1/2 mx-auto  text-xl"}
+                        onClick={() => {
+                            if (!isgamepaused) {
+                                direction !== "up" && setdirection("down")
+                            }
+                        }}
+                >DOWN</Button>
+
+            </div>}
 
 
-        </motion.div>
-    </motion.section>
+            <motion.div
+                initial={{opacity: 0, scale: 0.5}}
+                animate={{opacity: 1, scale: 1}}
+                exit={{opacity: 0, scale: 0.5}}
+
+                className={" text-xl "}>
+                {
+                    !isdevicetouchscreen() ? <div>
+                        <h3 className={"text-md text-center text-blue-400 my-2"}>Instructions</h3>
+                        <ul className={"flex gap-3 flex-col"}>
+
+                            <li>Use arrow keys to move the snake</li>
+                            <li>Press spacebar to pause the game & resume the game</li>
+                        </ul>
+                    </div> : <div>
+                        <ul className={"flex gap-3 flex-col"}>
+                            <li>Press game-board to pause the game & resume the game</li>
+                        </ul>
+                    </div>
+                }
+
+
+            </motion.div>
+        </motion.section>)
 }
 export default GameSpace
