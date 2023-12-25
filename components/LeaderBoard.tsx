@@ -11,7 +11,7 @@ interface typesforLeaderBoard {
 const LeaderBoard: FunctionComponent<typesforLeaderBoard> = (props) => {
 
     const router = useRouter()
-    const TABLE_HEAD = ["Name", "Score", "Date"];
+    const TABLE_HEAD = ["Sr no.", "Name", "Score", "Date"];
     const TABLE_ROWS = props.data
 
     return <>
@@ -37,20 +37,26 @@ const LeaderBoard: FunctionComponent<typesforLeaderBoard> = (props) => {
                 </tr>
                 </thead>
                 <tbody>
-                {TABLE_ROWS.map(({name, date, score}) => (
+                {TABLE_ROWS.map(({name, date, score}, index) => (
                     <tr key={name} className="even:bg-blue-gray-50/50 ">
-                        <td className="p-4">
+                        <td className="p-4 m-1">
+                            <Typography variant="h5" color="blue-gray"
+                                        className="font-normal text-sm md:text-lg capitalize">
+                                {index + 1}
+                            </Typography>
+                        </td>
+                        <td className="p-4 m-1">
                             <Typography variant="h5" color="blue-gray"
                                         className="font-normal text-sm md:text-lg capitalize">
                                 {name}
                             </Typography>
                         </td>
-                        <td className="p-4">
+                        <td className="p-4 m-1">
                             <Typography variant="h5" color="blue-gray" className="font-normal text-sm md:text-lg">
                                 {score}
                             </Typography>
                         </td>
-                        <td className="p-4">
+                        <td className="p-4 m-1">
                             <Typography variant="h5" color="blue-gray" className="font-normal text-sm md:text-lg">
                                 {new Date(date).toLocaleString("en-IN", {
                                     hour12: true,

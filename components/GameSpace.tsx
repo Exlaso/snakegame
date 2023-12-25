@@ -25,7 +25,8 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
     const [istarted, setistarted] = useState<boolean>(false);
     const [ismodalopen, setIsmodalopen] = useState<boolean>(false);
     const [isgamepaused, setisgamepaused] = useState<boolean>(false);
-    const GRID_SIZE: number = 15
+    const GRID_SIZE: number = 15;
+    const Size = `min(${60 / GRID_SIZE}em,${60 / GRID_SIZE}em)`;
     const INTIALSPEED = 100
     const [GAME_SPEED, setGAME_SPEED] = useState<number>(INTIALSPEED);
     const [isgameover, setisgameover] = useState<boolean>(false);
@@ -83,7 +84,7 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
 
     const movethroughwallforcol = (new_x_coord: coords): coords => {
         if (new_x_coord.col < 0) {
-            return {col: GRID_SIZE, row: new_x_coord.row}
+            return {col: GRID_SIZE - 1, row: new_x_coord.row}
         } else if (new_x_coord.col >= GRID_SIZE) {
             return {col: 0, row: new_x_coord.row}
         }
@@ -91,42 +92,29 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
     }
     const movethroughwallforrow = (new_x_coord: coords): coords => {
         if (new_x_coord.row < 0) {
-            return {col: new_x_coord.col, row: GRID_SIZE}
+            return {col: new_x_coord.col, row: GRID_SIZE - 1}
         } else if (new_x_coord.row >= GRID_SIZE) {
             return {col: new_x_coord.col, row: 0}
         }
         return new_x_coord
     }
+
+    const OrientSnake = (coords: coords[], col: number, row: number) => {
+
+        let new_x_coord: coords = {col: (coords[0].col + col), row: coords[0].row + row}
+        new_x_coord = (col !== 0 ? movethroughwallforcol(new_x_coord) : movethroughwallforrow(new_x_coord))
+        return [new_x_coord, ...coords.slice(0, coords.length - 1)]
+
+
+    }
     const MoveSnake = () => {
         if (snake.some((s) => s.col === snake[0].col && s.row === snake[0].row && s !== snake[0])) {
             crashedinself();
         }
-
-        if (direction === "up") setsnake((coords) => {
-            let new_x_coord: coords = {col: (coords[0].col - 1), row: coords[0].row}
-            new_x_coord = movethroughwallforcol(new_x_coord);
-            return [new_x_coord, ...coords.slice(0, coords.length - 1)]
-
-        })
-
-        if (direction === "down") setsnake((coords) => {
-            let new_x_coord: coords = {col: (coords[0].col + 1), row: coords[0].row}
-            new_x_coord = movethroughwallforcol(new_x_coord);
-            return [new_x_coord, ...coords.slice(0, coords.length - 1)]
-
-        })
-        if (direction === "left") setsnake((coords) => {
-            let new_x_coord: coords = {col: coords[0].col, row: coords[0].row - 1}
-            new_x_coord = movethroughwallforrow(new_x_coord);
-            return [new_x_coord, ...coords.slice(0, coords.length - 1)]
-
-        })
-        if (direction === "right") setsnake((coords) => {
-            let new_x_coord: coords = {col: coords[0].col, row: coords[0].row + 1}
-            new_x_coord = movethroughwallforrow(new_x_coord);
-            return [new_x_coord, ...coords.slice(0, coords.length - 1)]
-
-        })
+        if (direction === "up") setsnake((coords) => OrientSnake(coords, -1, 0))
+        if (direction === "down") setsnake((coords) => OrientSnake(coords, 1, 0))
+        if (direction === "left") setsnake((coords) => OrientSnake(coords, 0, -1))
+        if (direction === "right") setsnake((coords) => OrientSnake(coords, 0, 1))
 
     }
     const UpdateGameFrames = () => {
@@ -222,7 +210,10 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
                 }
 
 
-                grid.push(<div key={`${row}-${col}`} className={className}></div>)
+                grid.push(<div key={`${row}-${col}`} className={className}>
+                    {row}{col}
+
+                </div>)
             }
 
         }
@@ -385,6 +376,9 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
                 exit={{opacity: 0, scale: 0.5}}
 
                 className={" text-xl "}>
+                <span>
+                    Head Location RN: {snake?.at(0)?.col} {snake?.at(0)?.row}
+                </span>
                 {
                     !isdevicetouchscreen() ? <div>
                         <h3 className={"text-md text-center text-blue-400 my-2"}>Instructions</h3>
