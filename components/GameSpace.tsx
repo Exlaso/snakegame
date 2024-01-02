@@ -211,7 +211,7 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
 
 
                 grid.push(<div key={`${row}-${col}`} className={className}>
-                    {row}{col}
+                    {/*{row}{col}*/}
 
                 </div>)
             }
@@ -376,9 +376,9 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
                 exit={{opacity: 0, scale: 0.5}}
 
                 className={" text-xl "}>
-                <span>
-                    Head Location RN: {snake?.at(0)?.col} {snake?.at(0)?.row}
-                </span>
+                {/*<span>*/}
+                {/*    Head Location RN: {snake?.at(0)?.col} {snake?.at(0)?.row}*/}
+                {/*</span>*/}
                 {
                     !isdevicetouchscreen() ? <div>
                         <h3 className={"text-md text-center text-blue-400 my-2"}>Instructions</h3>
