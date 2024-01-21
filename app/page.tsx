@@ -4,8 +4,8 @@ import React, {useEffect, useState} from "react";
 import {Button, Input, Spinner, Typography} from "@material-tailwind/react";
 import {motion} from "framer-motion";
 import Link from "next/link";
-import {db} from "@/app/utils/airtable";
 import {useRouter} from "next/navigation";
+import {ExistingUser} from "@/app/actions";
 
 const jwt = require('jsonwebtoken');
 
@@ -25,10 +25,8 @@ export default function Home() {
 
         useEffect(() => {
             const cookie = document.cookie.split(";").find(c => c.startsWith("token"))
-            console.log({cookie})
-            if (cookie) {
+            if (cookie && cookie.length > 4) {
                 const decoded: APIADDCOOKIE = jwt.decode(cookie.split("=")[1], process.env.JWTKEY)
-                console.log({decoded})
                 setloggedinname(decoded.UserName)
             }
         }, [])
@@ -58,44 +56,19 @@ export default function Home() {
             }
             try {
                 setisloading(true)
-
-                db.select(
-                    {
-                        filterByFormula: `{User Name} = '${name}'`,
-                        maxRecords: 1,
-                        view: "Grid view"
-                    }
-                ).firstPage(async (records, fnp) => {
-                    if (fnp?.length === 0) {
-
-                        db.create([
-                                {
-                                    fields: {
-                                        "User Name": name,
-                                        "code": code,
-                                    }
-
-                                }
-                            ]
-                        ).then(async (res) => {
-                            await addcookie(res?.at(0)?.id!)
-                            setisloading(false)
-                            startgame();
-                        })
+                const res = await ExistingUser(name,code);
+                if (res) {
+                    if (res.code === code) {
+                        setisloading(false)
+                        await addcookie(res.id)
+                        startgame();
+                        return
                     } else {
-                        if (fnp?.find(f => f.fields.code === code)) {
-                            setisloading(false)
-                            await addcookie(fnp?.at(0)?.id || "")
-                            startgame();
-
-                            return
-                        } else {
-                            seterror("Code is incorrect.")
-                            setisloading(false)
-                            return
-                        }
+                        seterror("Code is incorrect.")
+                        setisloading(false)
+                        return
                     }
-                })
+                }
             } catch
                 (e) {
                 if (e instanceof Error) {

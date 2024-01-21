@@ -3,8 +3,8 @@ import React, {FunctionComponent, useCallback, useEffect, useState} from "react"
 import {motion} from "framer-motion";
 import {Button, DialogBody, DialogFooter, DialogHeader, Typography} from "@material-tailwind/react";
 import {useRouter} from "next/navigation";
-import {db} from "@/app/utils/airtable";
 import Link from "next/link";
+import {updateUserScore} from "@/app/actions";
 
 interface typesforGameSpace {
     username: string
@@ -55,22 +55,12 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
     }
     const [food, setfood] = useState<coords>({col: 3, row: 9});
 
-    const gameover = () => {
+    const gameover = async () => {
         window.removeEventListener("keydown", ChangeDirection)
         setisgameover(true)
         setIsmodalopen(true)
         if (props.id !== "") {
-            db.select({
-                    filterByFormula: `AND({User Name} = '${props.username}',{Score} < ${score})`,
-                    maxRecords: 1,
-                }
-            ).firstPage((e, i) => {
-
-                i?.at(0)?.updateFields({
-                    "Score": score,
-                })
-
-            })
+            await updateUserScore(props.id,score) ;
         }
     }
     // const crashedintowall = () => {
@@ -165,7 +155,7 @@ const GameSpace: FunctionComponent<typesforGameSpace> = (props) => {
         }
     }
     useEffect(() => {
-        setGAME_SPEED(INTIALSPEED - (score * 1.5))
+        setGAME_SPEED(INTIALSPEED - (score * 1.2))
 
     }, [score])
 
