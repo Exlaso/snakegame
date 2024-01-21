@@ -2,9 +2,10 @@
 import {FunctionComponent} from "react";
 import {Button, Card, Typography} from "@material-tailwind/react";
 import {useRouter} from "next/navigation";
+import {users} from "@prisma/client";
 
 interface typesforLeaderBoard {
-    data: customAIRTABLEDATA[]
+    data: users[]
 }
 
 
@@ -37,8 +38,16 @@ const LeaderBoard: FunctionComponent<typesforLeaderBoard> = (props) => {
                 </tr>
                 </thead>
                 <tbody>
-                {TABLE_ROWS.map(({name, date, score}, index) => (
-                    <tr key={name} className="even:bg-blue-gray-50/50 ">
+                { TABLE_ROWS.length === 0 ? <tr className="even:bg-blue-gray-50/50 ">
+                    <td className="p-4 m-1" colSpan={4}>
+                        <Typography variant="h5" color="blue-gray"
+                                    className="font-normal text-sm md:text-lg capitalize">
+                            No Data
+                        </Typography>
+                    </td>
+                </tr> :
+                TABLE_ROWS.map(({userName,scoreTime, score}, index) => (
+                    <tr key={userName} className="even:bg-blue-gray-50/50 ">
                         <td className="p-4 m-1">
                             <Typography variant="h5" color="blue-gray"
                                         className="font-normal text-sm md:text-lg capitalize">
@@ -48,7 +57,7 @@ const LeaderBoard: FunctionComponent<typesforLeaderBoard> = (props) => {
                         <td className="p-4 m-1">
                             <Typography variant="h5" color="blue-gray"
                                         className="font-normal text-sm md:text-lg capitalize">
-                                {name}
+                                {userName}
                             </Typography>
                         </td>
                         <td className="p-4 m-1">
@@ -58,7 +67,7 @@ const LeaderBoard: FunctionComponent<typesforLeaderBoard> = (props) => {
                         </td>
                         <td className="p-4 m-1">
                             <Typography variant="h5" color="blue-gray" className="font-normal text-sm md:text-lg">
-                                {new Date(date).toLocaleString("en-IN", {
+                                {new Date(scoreTime).toLocaleString("en-IN", {
                                     hour12: true,
                                     minute: "numeric",
                                     hour: "numeric",

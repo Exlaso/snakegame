@@ -1,7 +1,7 @@
 import {FunctionComponent} from "react";
 import LeaderBoard from "@/components/LeaderBoard";
-import {db} from "@/app/utils/airtable";
 import {Metadata} from "next";
+import {prisma} from "@/prisma/prismaClient";
 
 interface typesforpage {
 
@@ -39,35 +39,29 @@ export const metadata: Metadata = {
 }
 
 const page: FunctionComponent<typesforpage> = async () => {
-    const data = new Promise((resolve, reject) => {
-        db.select({
-            view: "Grid view",
-            maxRecords: 20,
-            sort: [{field: "Score", direction: "desc"}]
-        }).firstPage((err, records) => {
-            if (err) {
-                reject(err)
-            }
-            if (!records || !records?.at(0)?.fields) {
-                reject("No records")
-                return;
-            }
-            const AIRTABLEDATA: customAIRTABLEDATA = records.map((record) => {
-                return {
-                    name: record.fields["User Name"],
-                    score: record.fields.Score,
-                    id: record.fields.User_Unique_id,
-                    date: record.fields["Score Time"]
-                }
 
-            }) as any;
-            resolve(AIRTABLEDATA)
-        })
-    })
+    try {
+        await prisma.$connect();
+        const leaderBoardData = await prisma.users.findMany({
+            orderBy: {
+                score: "desc"
+            },
+        });
+        await prisma.$disconnect();
+        return <LeaderBoard data={leaderBoardData}>
+
+        </LeaderBoard>
+
+    } catch (error) {
+        if (error instanceof Error) {
+            console.error(error.message);
+
+        }
+        return <LeaderBoard data={[]}/>
+    } finally {
+        await prisma.$disconnect();
+    }
 
 
-    return <LeaderBoard data={await data as customAIRTABLEDATA[]}>
-
-    </LeaderBoard>
 }
 export default page
